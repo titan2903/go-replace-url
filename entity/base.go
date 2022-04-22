@@ -34,4 +34,15 @@ type (
 		Medium    *Image `json:"medium,omitempty"`
 		Thumbnail *Image `json:"thumbnail,omitempty"`
 	}
+
+	ImageUrl struct {
+		Url string `json:"url,omitempty"`
+	}
+
+	ModifyUploadFileModelUrl struct {
+		Id  int    `db:"id"`
+		Url string `db:"url"`
+	}
+
+	ModifyUploadFileModelUrls []ModifyUploadFileModelUrl
 )

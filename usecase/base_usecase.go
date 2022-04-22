@@ -14,6 +14,7 @@ import (
 
 type BaseUsecase interface {
 	ReplaceImage() error
+	ReplaceImageUrl() error
 }
 
 type baseUsecase struct {
@@ -55,6 +56,38 @@ func (u baseUsecase) ReplaceImage() error {
 	}
 
 	err = u.repository.BulkUpdateImage(imagePayload)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u baseUsecase) ReplaceImageUrl() error {
+	imageData, err := u.repository.ReplaceImage()
+	if err != nil {
+		return err
+	}
+
+	wg := &sync.WaitGroup{}
+	modifyChan := make(chan entity.ModifyUploadFileModelUrl)
+	for _, val := range imageData {
+		wg.Add(1)
+
+		go u.readBufferUrl(wg, val, modifyChan)
+	}
+
+	go func() {
+		wg.Wait()
+		close(modifyChan)
+	}()
+
+	imagePayload := entity.ModifyUploadFileModelUrls{}
+	for data := range modifyChan {
+		imagePayload = append(imagePayload, data)
+	}
+
+	err = u.repository.UpdateUrlImage(imagePayload)
 	if err != nil {
 		return err
 	}
@@ -104,6 +137,25 @@ func (u baseUsecase) readBuffer(wg *sync.WaitGroup, data entity.UploadFileModel,
 	modify <- dest
 }
 
+func (u baseUsecase) readBufferUrl(wg *sync.WaitGroup, data entity.UploadFileModel, modify chan entity.ModifyUploadFileModelUrl) {
+	defer wg.Done()
+
+	if data.Url == "" {
+		return
+	}
+
+	if data.Url != "" {
+		data.Url = u.replaceSingleImage(data.Url, "https://dlo75jjjtr3ck.cloudfront.net/emi-banner.jpg")
+	}
+
+	dest := entity.ModifyUploadFileModelUrl{
+		Id:  data.Id,
+		Url: data.Url,
+	}
+
+	modify <- dest
+}
+
 func (u baseUsecase) replaceImage(imageUrl, originalUrl string) string {
 	original := u.extractSubDomain(originalUrl)
 	image := u.extractSubDomain(imageUrl)
@@ -114,6 +166,21 @@ func (u baseUsecase) replaceImage(imageUrl, originalUrl string) string {
 
 	if !strings.EqualFold(*image, *original) {
 		return strings.Replace(imageUrl, *image, *original, -1)
+	}
+
+	return imageUrl
+}
+
+func (u baseUsecase) replaceSingleImage(imageUrl, replaceUrl string) string {
+	uat := u.extractSubDomain(replaceUrl)
+	dev := u.extractSubDomain(imageUrl)
+
+	if dev == nil || uat == nil {
+		return imageUrl
+	}
+
+	if !strings.EqualFold(*dev, *uat) {
+		return strings.Replace(imageUrl, *dev, *uat, -1)
 	}
 
 	return imageUrl
