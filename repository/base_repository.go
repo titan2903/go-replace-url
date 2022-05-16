@@ -52,8 +52,17 @@ var (
   `
 
 	bulkInsertNumber = `
-	INSERT INTO customer_numbers (phone_number)
-	VALUES (:phone_number);
+		INSERT INTO customer_numbers (phone_number)
+		VALUES (:phone_number)
+		ON CONFLICT (phone_number)
+		DO UPDATE
+		SET phone_number = :phone_number;
+	`
+
+	getCustomerNumbers = `
+		SELECT
+			phone_number
+		FROM customer_numbers
 	`
 )
 
@@ -116,6 +125,17 @@ func (r baseRepository) UpdateUrlImage(payloads entity.ModifyUploadFileModelUrls
 	}
 
 	return nil
+}
+
+func (r baseRepository) GetCustomerNumbers() (entity.PhoneNumbers, error) {
+	dest := entity.PhoneNumbers{}
+	err := r.db.SelectContext(r.ctx, &dest, getCustomerNumbers)
+	if err != nil {
+		fmt.Printf("\033[1;31m [ERROR] \033[0m Repository ReplaceImage: %v\n", err.Error())
+		return nil, err
+	}
+
+	return dest, nil
 }
 
 func (r baseRepository) BulkInsertNumber(payloads entity.PhoneNumbers) error {
