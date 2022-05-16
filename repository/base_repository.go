@@ -55,8 +55,7 @@ var (
 		INSERT INTO customer_numbers (phone_number)
 		VALUES (:phone_number)
 		ON CONFLICT (phone_number)
-		DO UPDATE
-		SET phone_number = :phone_number;
+		DO NOTHING;
 	`
 
 	getCustomerNumbers = `
