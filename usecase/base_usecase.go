@@ -2,9 +2,13 @@ package usecase
 
 import (
 	"context"
+	"encoding/csv"
 	"encoding/json"
+	"fmt"
+	"io"
 	"log"
 	"net/url"
+	"os"
 	"replace-url-gin/config"
 	"replace-url-gin/entity"
 	"replace-url-gin/repository"
@@ -15,6 +19,7 @@ import (
 type BaseUsecase interface {
 	ReplaceImage() error
 	ReplaceImageUrl() error
+	BulkInsertNumber() error
 }
 
 type baseUsecase struct {
@@ -196,4 +201,56 @@ func (u baseUsecase) extractSubDomain(imageUrl string) *string {
 		return nil
 	}
 	return &arrDomain[0]
+}
+
+func (u baseUsecase) BulkInsertNumber() error {
+	file, err := os.Open("data/number.csv")
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+
+	err = u.insertNumberData(file)
+	if err != nil {
+		panic(err)
+	}
+
+	return nil
+}
+
+func (u baseUsecase) insertNumberData(file *os.File) error {
+	reader := csv.NewReader(file)
+	fmt.Printf("reader: %+v \n", reader)
+
+	var arrayNumbers entity.PhoneNumbers
+
+	for {
+		line, err := reader.Read()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			return err
+		}
+
+		if len(line) == 0 {
+			continue
+		}
+
+		if line[0] != "phone_number" {
+			fmt.Printf("line 0: %+v \n", line[0])
+
+			arrayNumbers = append(arrayNumbers, entity.PhoneNumber{
+				PhoneNumber: line[0],
+			})
+
+		}
+	}
+
+	fmt.Printf("numbers: %+v", arrayNumbers)
+	err := u.repository.BulkInsertNumber(arrayNumbers)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

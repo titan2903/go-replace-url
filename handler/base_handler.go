@@ -11,6 +11,7 @@ import (
 type BaseHandler interface {
 	HandleReplaceImage(c *gin.Context)
 	HandleReplaceImageUrl(c *gin.Context)
+	HandleBulkInsertNumber(c *gin.Context)
 }
 
 type baseHandler struct {
@@ -34,10 +35,20 @@ func (h baseHandler) HandleReplaceImage(c *gin.Context) {
 }
 
 func (h baseHandler) HandleReplaceImageUrl(c *gin.Context) {
-	fmt.Println("msuk replace")
+	fmt.Println("masuk replace")
 	err := h.usecase.ReplaceImageUrl()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, "Something wrong!")
+		return
+	}
+
+	c.JSON(http.StatusOK, "Success!")
+}
+
+func (h baseHandler) HandleBulkInsertNumber(c *gin.Context) {
+	err := h.usecase.BulkInsertNumber()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, "Internal Server Error!")
 		return
 	}
 

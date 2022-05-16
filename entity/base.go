@@ -45,4 +45,14 @@ type (
 	}
 
 	ModifyUploadFileModelUrls []ModifyUploadFileModelUrl
+
+	PhoneNumber struct {
+		PhoneNumber string `db:"phone_number"`
+	}
+
+	PhoneNumbers []PhoneNumber
+
+	// CsvUploadInput struct {
+	// 	CsvFile *multipart.FileHeader `form:"file" binding:"required"`
+	// }
 )

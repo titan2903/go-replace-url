@@ -13,6 +13,7 @@ type BaseRepository interface {
 	ReplaceImage() (entity.UploadFileModels, error)
 	BulkUpdateImage(payloads entity.ModifyUploadFileModels) error
 	UpdateUrlImage(payloads entity.ModifyUploadFileModelUrls) error
+	BulkInsertNumber(payloads entity.PhoneNumbers) error
 }
 
 type baseRepository struct {
@@ -49,6 +50,11 @@ var (
 	SET url = :url
 	WHERE id = :id
   `
+
+	bulkInsertNumber = `
+	INSERT INTO customer_numbers (phone_number)
+	VALUES (:phone_number);
+	`
 )
 
 func (r baseRepository) ReplaceImage() (entity.UploadFileModels, error) {
@@ -106,6 +112,33 @@ func (r baseRepository) UpdateUrlImage(payloads entity.ModifyUploadFileModelUrls
 	if err != nil {
 		tx.Rollback()
 		fmt.Printf("\033[1;31m [ERROR] \033[0m Repository BulkUpdateImage Commit: %v\n", err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func (r baseRepository) BulkInsertNumber(payloads entity.PhoneNumbers) error {
+	tx, err := r.db.Beginx()
+	if err != nil {
+		fmt.Printf("\033[1;31m [ERROR] \033[0m Repository BulkInsertNumber Begin: %v\n", err.Error())
+		return err
+
+	}
+
+	for _, payload := range payloads {
+		fmt.Printf("payload: %+v", payload)
+		_, err = tx.NamedExecContext(r.ctx, bulkInsertNumber, payload)
+		if err != nil {
+			fmt.Printf("\033[1;31m [ERROR] \033[0m Repository BulkInsertNumber NamedExec: %v\n", err.Error())
+			return err
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		fmt.Printf("\033[1;31m [ERROR] \033[0m Repository BulkInsertNumber Commit: %v\n", err.Error())
 		return err
 	}
 

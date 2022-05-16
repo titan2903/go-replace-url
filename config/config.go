@@ -12,7 +12,7 @@ var (
 
 type Config struct {
 	Port                 int           `envconfig:"PORT" default:"8080"`
-	DB                   string        `envconfig:"DB_NAME" default:"strapi_dump"`
+	DB                   string        `envconfig:"DB_NAME" default:"emi_site"`
 	DBHost               string        `envconfig:"DB_HOST" default:"localhost"`
 	DBPort               int           `envconfig:"DB_PORT" default:"5432"`
 	DBUsername           string        `envconfig:"DB_USERNAME" default:"postgres"`

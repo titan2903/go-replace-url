@@ -5,4 +5,5 @@ func (r router) BaseRouter() {
 
 	r.route.GET("/", handler.HandleReplaceImage)
 	r.route.GET("/url", handler.HandleReplaceImageUrl)
+	r.route.GET("/insert", handler.HandleBulkInsertNumber)
 }
