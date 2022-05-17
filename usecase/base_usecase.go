@@ -204,7 +204,7 @@ func (u baseUsecase) extractSubDomain(imageUrl string) *string {
 }
 
 func (u baseUsecase) BulkInsertNumber() error {
-	file, err := os.Open("data/number.csv")
+	file, err := os.Open("data/customer_number.csv")
 	if err != nil {
 		panic(err)
 	}
@@ -236,7 +236,7 @@ func (u baseUsecase) insertNumberData(file *os.File) error {
 			continue
 		}
 
-		if line[0] != "phone_number" {
+		if line[0] != "phone_number" && line[0] != "" {
 			fmt.Printf("line 0: %+v \n", line[0])
 
 			arrayNumbers = append(arrayNumbers, entity.PhoneNumber{
