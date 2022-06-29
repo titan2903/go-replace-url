@@ -150,7 +150,7 @@ func (u baseUsecase) readBufferUrl(wg *sync.WaitGroup, data entity.UploadFileMod
 	}
 
 	if data.Url != "" {
-		data.Url = u.replaceSingleImage(data.Url, "https://dlo75jjjtr3ck.cloudfront.net/emi-banner.jpg")
+		data.Url = u.replaceSingleImage(data.Url, "https://d1q4jxvzqodmzu.cloudfront.net/emi-banner.jpg")
 	}
 
 	dest := entity.ModifyUploadFileModelUrl{
@@ -204,7 +204,7 @@ func (u baseUsecase) extractSubDomain(imageUrl string) *string {
 }
 
 func (u baseUsecase) BulkInsertNumber() error {
-	file, err := os.Open("data/customer_number.csv")
+	file, err := os.Open("data/registration_whitelist.csv")
 	if err != nil {
 		panic(err)
 	}
